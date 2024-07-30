@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!-- © Pierre Carbonnelle, 2024.  ALl rights reserved -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blinking Dot</title>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    p { position: relative;
+        z-index: -1}
+    #canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: none;
+    }
+</style>
+</head>
+<body>
+<div id="A">
+    <H1 class="title">Glaucoma-Test Online</h1>
+    <h3 class="subtitle">Use this page to find blind spots in your visual field with your PC or Mac.
+        <br>This test is time-consuming, and doctors often don't give you enough time to do it.
+    </h3>
+    <p>Look at the small red dot in the middle of the screen with only one eye, fixedly.
+    <br>Move the large red dot with the mouse or arrow keys (and Shift key) and search for blind spots.
+    <br>Click the mouse when you don't see the large dot while fixing the small dot.  Move and repeat.
+    <br>Press the Enter key to view the blind zones in your visual field.
+    <br>Print the web page and show it to your doctor.
+    <br>Reload the page to restart.
+    <p>© Pierre Carbonnelle, 2024</p>
+</div>
+<div id="B" style="display:none">
+    <H1>Glaucoma-Test Online</h1>
+    <p>Test date: <span id="datetime"></span></p>
+    <p>Press Enter again to return to entry mode.</p>
+
+    <p>© Pierre Carbonnelle, 2024</p>
+</div>
+
+<svg id="canvas" width="500" height="500">
+    <circle id="dot"       cx="50%" cy="50%" r="5" fill="red"></circle>
+    <circle id="fixed_dot" cx="50%" cy="50%" r="2" fill="red"></circle>
+</svg>
+
+<script>
+    // create a function to update the date and time
+    function updateDateTime() {
+      // create a new `Date` object
+      const now = new Date();
+
+      // get the current date and time as a string
+      const currentDateTime = now.toLocaleString();
+
+      // update the `textContent` property of the `span` element with the `id` of `datetime`
+      document.querySelector('#datetime').textContent = currentDateTime;
+    }
+
+    updateDateTime();
+    // Get the dot element and set initial position
+    const dot = document.getElementById('dot');
+    let x = Math.floor(window.innerWidth / 2);
+    let y = Math.floor(window.innerHeight / 2);
+	fixed_dot.setAttribute('cx', x);
+	fixed_dot.setAttribute('cy', y);
+
+    // Function to update dot position
+    function updateDot() {
+        dot.setAttribute('cx', x);
+        dot.setAttribute('cy', y);
+    }
+    x = x + 25;
+    updateDot();
+
+    // Array to hold dot elements
+    const dots = [];
+    var black = false;
+
+    // Function to create a new dot
+    function createDot(x, y) {
+        const dot_ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        dot_.setAttribute('cx', x);
+        dot_.setAttribute('cy', y);
+        dot_.setAttribute('r', 2);
+        dot_.setAttribute('fill', 'blue');
+        dot_.style.visibility = 'hidden';
+        canvas.appendChild(dot_);
+        if (typeof dots[x] === 'undefined') {dots[x] = []};
+        if (typeof dots[x][y] === 'undefined') {
+           dots[x][y] = dot_
+        } else {
+           delete dots[x][y]
+        }
+    }
+
+    // Function to handle arrow key presses && event.shiftKey
+    function handleKeyPress(event) {
+        speed = event.shiftKey ? 5 : 25; // Speed of movement
+        switch (event.key) {
+            case 'ArrowUp':
+                y -= speed;
+                break;
+            case 'ArrowDown':
+                y += speed;
+                break;
+            case 'ArrowLeft':
+                x -= speed;
+                break;
+            case 'ArrowRight':
+                x += speed;
+                break;
+            case ' ':
+                // Add a new dot at the current position
+                createDot(x, y);
+                break;
+            case 'Enter':
+            	// toggle dots
+            	black = ! black;
+            	dot.style.visibility = black ? 'hidden' : 'visible';
+            	fixed_dot.style.visibility = 'visible';
+
+            	A.style.display = black ? 'none' : 'block';
+            	B.style.display = (!black) ? 'none' : 'block';
+                dots.forEach(row => {
+                    row.forEach(dot => {
+                    	dot.style.visibility = (dot.style.visibility === 'visible') ? 'hidden' : 'visible';
+                    })
+		});
+                updateDateTime();
+                break;
+        }
+        updateDot();
+    }
+
+    function handleMouseMove(event) {
+	    x = event.clientX;
+	    y = event.clientY;
+	    updateDot();
+    }
+    function handleMouseClick(event) {
+    	createDot(x,y)
+    }
+
+    // Add event listener for key presses
+    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('click', handleMouseClick);
+
+    // Function to make the dot blink
+    function blinkDot() {
+        dot.style.visibility = black ? 'hidden' : ((dot.style.visibility === 'visible') ? 'hidden' : 'visible');
+    }
+    function blinkfixed_dot() {
+        fixed_dot.style.visibility = black ? 'visible' : ((fixed_dot.style.visibility === 'visible') ? 'hidden' : 'visible');
+    }
+
+    // Call blinkDot function every 500 milliseconds
+    setInterval(blinkDot, 200);  // moving
+    setInterval(blinkfixed_dot, 200);
+</script>
+</body>
+</html>
+
