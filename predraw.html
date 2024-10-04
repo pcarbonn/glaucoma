@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Lines on Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- A4: 842x595 -->
+    <canvas id="a4Canvas" width="2400" height="950"></canvas>
+
+    <script>
+        // Get the seed parameter from the URL (if provided)
+        const params = new URLSearchParams(window.location.search);
+        const seed = params.has('seed') ? parseInt(params.get('seed')) : Math.floor(Math.random() * 100000);
+
+        function splitmix32(a) {
+	 return function() {
+	   a |= 0;
+	   a = a + 0x9e3779b9 | 0;
+	   let t = a ^ a >>> 16;
+	   t = Math.imul(t, 0x21f0aaad);
+	   t = t ^ t >>> 15;
+	   t = Math.imul(t, 0x735a2d97);
+	   return ((t = t ^ t >>> 15) >>> 0) / 4294967296;
+	  }
+	}
+
+	// local random function
+	const rand = splitmix32(seed>>>0)
+	const selects = (params.has('select') ? params.get("select") : "").split(",");
+	console.log(selects)
+	var select = selects.map(function (x) { 
+	  return parseInt(x, 10); 
+	});
+	
+        
+        // get the selected lines
+        
+        
+        // Get the canvas element and the drawing context
+        const canvas = document.getElementById('a4Canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Function to draw a random line and label it with a number
+        function drawRandomLine(index) {
+            // Set line length
+            const length = 100; // Arbitrary length, adjust as needed
+            
+            // Random starting point within the canvas
+            const x1 = rand() * (canvas.width-length);
+            const y1 = rand() * (canvas.height-2*length)+length;
+
+            // Random angle in radians (-90 to 90 degrees)
+            const angle = rand() * Math.PI - Math.PI/2;
+
+
+            // Calculate end point based on the angle
+            const x2 = x1 + Math.cos(angle) * length;
+            const y2 = y1 + Math.sin(angle) * length;
+            
+            color = `hsl(${rand() * 360}, 100%, 50%)`; // Random color
+            
+            selected = (select.length == 1)
+            for (value of select) {
+            	if (value == index) selected = true
+            }
+            
+            if (selected) {
+
+		    // Draw the line
+		    ctx.beginPath();
+		    ctx.moveTo(x1, y1);
+		    ctx.lineTo(x2, y2);
+		    ctx.strokeStyle = color
+		    ctx.lineWidth = 10; // Set line thickness
+		    ctx.stroke();
+
+		    // Label the line with a number
+		    if (select.length == 1) {
+			    ctx.font = "8px Arial";
+			    ctx.fillStyle = ctx.strokeStyle;
+			    ctx.fillText(index, x1 + 5, y1 + 5); // Offset the label slightly from the start of the line
+			    ctx.fillText(index, x1 + 5, y1 - 5); // Offset the label slightly from the start of the line	
+		    }
+	    }
+        }
+
+        // Draw 12 random lines and label them
+        for (let i = 1; i <= 12; i++) {
+            	drawRandomLine(i);
+        }
+    </script>
+</body>
+</html>
+
