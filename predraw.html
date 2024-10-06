@@ -37,14 +37,14 @@
 	const rand = splitmix32(seed>>>0)
 	const selects = (params.has('select') ? params.get("select") : "").split(",");
 	console.log(selects)
-	var select = selects.map(function (x) { 
-	  return parseInt(x, 10); 
+	var select = selects.map(function (x) {
+	  return parseInt(x, 10);
 	});
-	
-        
+
+
         // get the selected lines
-        
-        
+
+
         // Get the canvas element and the drawing context
         const canvas = document.getElementById('a4Canvas');
         const ctx = canvas.getContext('2d');
@@ -53,7 +53,7 @@
         function drawRandomLine(index) {
             // Set line length
             const length = 100; // Arbitrary length, adjust as needed
-            
+
             // Random starting point within the canvas
             const x1 = rand() * (canvas.width-length);
             const y1 = rand() * (canvas.height-2*length)+length;
@@ -65,14 +65,14 @@
             // Calculate end point based on the angle
             const x2 = x1 + Math.cos(angle) * length;
             const y2 = y1 + Math.sin(angle) * length;
-            
+
             color = `hsl(${rand() * 360}, 100%, 50%)`; // Random color
-            
+
             selected = (select.length == 1)
             for (value of select) {
             	if (value == index) selected = true
             }
-            
+
             if (selected) {
 
 		    // Draw the line
@@ -88,7 +88,7 @@
 			    ctx.font = "8px Arial";
 			    ctx.fillStyle = ctx.strokeStyle;
 			    ctx.fillText(index, x1 + 5, y1 + 5); // Offset the label slightly from the start of the line
-			    ctx.fillText(index, x1 + 5, y1 - 5); // Offset the label slightly from the start of the line	
+			    ctx.fillText(index, x1 + 5, y1 - 5); // Offset the label slightly from the start of the line
 		    }
 	    }
         }
@@ -97,11 +97,32 @@
         for (let i = 1; i <= 12; i++) {
             	drawRandomLine(i);
         }
-        
+
         // clear the canvas when clicked
+        clicked = false;
         canvas.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            clicked = true
         });
+        document.body.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            clicked = true
+        });
+
+        // Function to toggle canvas visibility (for blinking effect)
+        let isVisible = true;
+        function blinkCanvas() {
+            if (isVisible || clicked) {
+                canvas.style.visibility = 'hidden'; // Hide the canvas
+            } else {
+                canvas.style.visibility = 'visible'; // Show the canvas
+            }
+            isVisible = !isVisible; // Toggle visibility state
+        }
+
+        // Set an interval to make the canvas blink every 500 milliseconds (0.5 seconds)
+        setInterval(blinkCanvas, 500);
+
     </script>
 </body>
 </html>
