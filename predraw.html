@@ -1,129 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Lines on Canvas</title>
+    <title>Images Aléatoires</title>
     <style>
-        canvas {
-            border: 1px solid black;
-            display: block;
-            margin: 0 auto;
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .gallery img {
+            width: 500px;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <!-- A4: 842x595 -->
-    <canvas id="a4Canvas" width="2400" height="950"></canvas>
+    <h1>Galerie d'Images Aléatoires</h1>
+    <div class="gallery" id="gallery"></div>
 
     <script>
         // Get the seed parameter from the URL (if provided)
         const params = new URLSearchParams(window.location.search);
         const seed = params.has('seed') ? parseInt(params.get('seed')) : Math.floor(Math.random() * 100000);
 
+        // local random function
         function splitmix32(a) {
-	 return function() {
-	   a |= 0;
-	   a = a + 0x9e3779b9 | 0;
-	   let t = a ^ a >>> 16;
-	   t = Math.imul(t, 0x21f0aaad);
-	   t = t ^ t >>> 15;
-	   t = Math.imul(t, 0x735a2d97);
-	   return ((t = t ^ t >>> 15) >>> 0) / 4294967296;
-	  }
-	}
-
-	// local random function
-	const rand = splitmix32(seed>>>0)
-	const selects = (params.has('select') ? params.get("select") : "").split(",");
-	console.log(selects)
-	var select = selects.map(function (x) {
-	  return parseInt(x, 10);
-	});
-
-
-        // get the selected lines
-
-
-        // Get the canvas element and the drawing context
-        const canvas = document.getElementById('a4Canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Function to draw a random line and label it with a number
-        function drawRandomLine(index) {
-            // Set line length
-            const length = 100; // Arbitrary length, adjust as needed
-
-            // Random starting point within the canvas
-            const x1 = rand() * (canvas.width-length);
-            const y1 = rand() * (canvas.height-2*length)+length;
-
-            // Random angle in radians (-90 to 90 degrees)
-            const angle = rand() * Math.PI - Math.PI/2;
-
-
-            // Calculate end point based on the angle
-            const x2 = x1 + Math.cos(angle) * length;
-            const y2 = y1 + Math.sin(angle) * length;
-
-            color = `hsl(${rand() * 360}, 100%, 50%)`; // Random color
-
-            selected = (select.length == 1)
-            for (value of select) {
-            	if (value == index) selected = true
+            return function() {
+            a |= 0;
+            a = a + 0x9e3779b9 | 0;
+            let t = a ^ a >>> 16;
+            t = Math.imul(t, 0x21f0aaad);
+            t = t ^ t >>> 15;
+            t = Math.imul(t, 0x735a2d97);
+            return ((t = t ^ t >>> 15) >>> 0) / 4294967296;
             }
+        }
+        const rand = splitmix32(seed>>>0)
 
-            if (selected) {
+        // Liste d'images (remplacez les URLs par les vôtres)
+        const imageUrls = [
+'20240414_153655.jpg',
+'20240422_155208.jpg',
+'20240524_145727.jpg',
+'20240727_093108.jpg',
+'20240804_133224.jpg',
+'20240829_154847.jpg',
+'20240914_100458.jpg',
+'20240929_114047.jpg',
+'20241010_142819.jpg',
+'20241026_191038.jpg',
+'IMG-20240212-WA0004.jpg',
+'IMG-20240302-WA0005.jpg',
+'IMG-20240710-WA0011.jpg',
+'IMG-20240714-WA0018.jpg',
+'IMG-20240718-WA0026.jpg',
+'IMG-20240719-WA0010.jpg',
+'IMG-20240721-WA0006.jpg',
+'IMG-20240818-WA0002.jpg',
+'IMG-20240930-WA0002.jpg',
+'PXL_20240726_110946907.MP.jpg',
+'PXL_20240913_183219156.jpg',
+        ];
 
-		    // Draw the line
-		    ctx.beginPath();
-		    ctx.moveTo(x1, y1);
-		    ctx.lineTo(x2, y2);
-		    ctx.strokeStyle = color
-		    ctx.lineWidth = 10; // Set line thickness
-		    ctx.stroke();
-
-		    // Label the line with a number
-		    if (select.length == 1) {
-			    ctx.font = "8px Arial";
-			    ctx.fillStyle = ctx.strokeStyle;
-			    ctx.fillText(index, x1 + 5, y1 + 5); // Offset the label slightly from the start of the line
-			    ctx.fillText(index, x1 + 5, y1 - 5); // Offset the label slightly from the start of the line
-		    }
-	    }
+        // Fonction pour obtenir 10 images aléatoires sans répétition
+        function getRandomImages(images, count) {
+            const shuffled = [...images].sort(() => 0.5 - rand());
+            return shuffled.slice(0, count);
         }
 
-        // Draw 12 random lines and label them
-        for (let i = 1; i <= 12; i++) {
-            	drawRandomLine(i);
+        // Sélectionner 10 images et les afficher dans la galerie
+        const gallery = document.getElementById('gallery');
+        const randomImages = getRandomImages(imageUrls, 12);
+
+        if (params.has('select')) {
+            n = parseInt(params.get("select"), 10);
+            url = randomImages[n];
+            const imgElement = document.createElement('img');
+            imgElement.src = url;
+            gallery.appendChild(imgElement);
+        } else {
+            randomImages.forEach(url => {
+                const imgElement = document.createElement('img');
+                imgElement.src = url;
+                gallery.appendChild(imgElement);
+            });
         }
-
-        // clear the canvas when clicked
-        clicked = false;
-        canvas.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            clicked = true
-        });
-        document.body.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            clicked = true
-        });
-
-        // Function to toggle canvas visibility (for blinking effect)
-        let isVisible = true;
-        function blinkCanvas() {
-            if (isVisible || clicked) {
-                canvas.style.visibility = 'hidden'; // Hide the canvas
-            } else {
-                canvas.style.visibility = 'visible'; // Show the canvas
-            }
-            isVisible = !isVisible; // Toggle visibility state
-        }
-
-        // Set an interval to make the canvas blink every 500 milliseconds (0.5 seconds)
-        setInterval(blinkCanvas, 500);
-
     </script>
 </body>
 </html>
-
