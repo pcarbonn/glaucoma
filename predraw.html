@@ -11,16 +11,39 @@
             gap: 10px;
             justify-content: center;
         }
-        .gallery img {
-            width: 500px;
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+        .image-container img {
+            width: 300px;
             height: auto;
             border: 2px solid #ddd;
             border-radius: 5px;
+        }
+        .image-container .number-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: white;
+            color: rgba(0, 0, 0, 0.7);
+            font-size: 16px;
+            font-weight: bold;
+            padding: 5px 8px;
+            border-radius: 50%;
+            text-align: center;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
 <body>
     <h1>Galerie d'Images Aléatoires</h1>
+    <div id="seed"></div>
+    <div id="form"></div>
     <div class="gallery" id="gallery"></div>
 
     <script>
@@ -67,28 +90,92 @@
 'PXL_20240913_183219156.jpg',
         ];
 
-        // Fonction pour obtenir 10 images aléatoires sans répétition
+        // Sélection de 12 images
         function getRandomImages(images, count) {
             const shuffled = [...images].sort(() => 0.5 - rand());
             return shuffled.slice(0, count);
         }
-
-        // Sélectionner 10 images et les afficher dans la galerie
-        const gallery = document.getElementById('gallery');
         const randomImages = getRandomImages(imageUrls, 12);
 
-        if (params.has('select')) {
-            n = parseInt(params.get("select"), 10);
-            url = randomImages[n];
-            const imgElement = document.createElement('img');
-            imgElement.src = url;
-            gallery.appendChild(imgElement);
-        } else {
-            randomImages.forEach(url => {
+        const seed_div = document.getElementById('seed');
+        const gallery = document.getElementById('gallery');
+
+        seed_div.innerHTML = `<p>Seed: ${seed}</p>`;
+        if (!params.has('seed')) {  // stabilize the seed
+            form.innerHTML = `<p>I can win money for Similes with remove viewing</p>
+            <a href=predraw.html?seed=${seed}>Start</a>`
+        } else if ( !params.has('select')) {
+            gallery.style.display = 'none';
+            form.innerHTML =
+            `<p>Va au moment du feedback et aide-moi à remplir le formulaire qui décrit la scène qu’il y a sur l’écran</p>
+            <a href="https://forms.gle/9vfJ4H8zcZu3dLtV9">Form</a>
+            <br>
+            <p>Ensuite, choisi une image ci-dessous</p>
+            <button onclick="ShowGallery()">Show images</button>`;
+            randomImages.forEach((url, index) => {
+
+                // Create container for image and overlay
+                const container = document.createElement('a');
+                container.className = 'image-container';
+                container.href = `predraw.html?seed=${seed}&select=${index+1}`;
+
+                // Create image element
                 const imgElement = document.createElement('img');
                 imgElement.src = url;
-                gallery.appendChild(imgElement);
+
+                // Create overlay for the number
+                const overlay = document.createElement('div');
+                overlay.className = 'number-overlay';
+                overlay.textContent = index + 1; // Number starts at 1
+
+                // Append image and overlay to container
+                container.appendChild(imgElement);
+                container.appendChild(overlay);
+
+                // Append container to gallery
+                gallery.appendChild(container);
             });
+        } else {
+            form.innerHTML = `<p>L'image choisie est à gauche, la cible à droite. Décrit la cible dans le formulaire.</p>
+            <a href=https://forms.gle/iDdxSgyA4qgVjf5VA>Final form</a>`;
+
+            // selected
+            container = document.createElement('div');
+            container.className = 'image-container';
+            n = parseInt(params.get("select"));
+            url = randomImages[n-1];
+             imgElement = document.createElement('img');
+            imgElement.src = url;
+            container.appendChild(imgElement);
+            gallery.appendChild(container);
+
+            // target
+            container = document.createElement('div');
+            container.className = 'image-container';
+            n = Math.floor(rand()*12);
+            url = randomImages[n];
+             imgElement = document.createElement('img');
+            imgElement.src = url;
+            overlay = document.createElement('div');
+            overlay.className = 'number-overlay';
+            overlay.textContent = n + 1; // Number starts at 1
+            container.appendChild(imgElement);
+            container.appendChild(overlay);
+            gallery.appendChild(container);
+
+        }
+        function ShowGallery() {
+            const div = document.getElementById('gallery');
+            const button = event.target;
+
+            // Toggle the display style
+            if (div.style.display === 'none' || div.style.display === '') {
+                div.style.display = 'block'; // Show the div
+                button.textContent = 'Hide Div'; // Optional: Change button text
+            } else {
+                div.style.display = 'none'; // Hide the div
+                button.textContent = 'Show Div'; // Optional: Change button text
+            }
         }
     </script>
 </body>

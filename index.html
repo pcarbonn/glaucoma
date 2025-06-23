@@ -46,7 +46,9 @@
     <H1>Glaucoma-Test Online</h1>
     <p>Test date: <span id="datetime"></span></p>
     <p>Press Enter again to return to entry mode.</p>
+    <p></p>
 
+    <p>https://pcarbonn.github.io/glaucoma/</p>
     <p>© Pierre Carbonnelle, 2024</p>
 </div>
 
@@ -62,7 +64,8 @@
       const now = new Date();
 
       // get the current date and time as a string
-      const currentDateTime = now.toLocaleString();
+      const currentDateTime = now.toLocaleDateString('en-US', {
+        day: 'numeric', month: 'short', year: 'numeric'});
 
       // update the `textContent` property of the `span` element with the `id` of `datetime`
       document.querySelector('#datetime').textContent = currentDateTime;
